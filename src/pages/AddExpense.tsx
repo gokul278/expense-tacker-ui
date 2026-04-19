@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useDate } from '../context/DateContext';
 import { useNavigate } from 'react-router-dom';
-import type { Expense } from '../types';
 import { 
   ForkKnife, Car, House, FirstAid, Television, 
   ShoppingBag, BookOpen, Airplane, Receipt, 

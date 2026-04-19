@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useDate } from '../context/DateContext';
 import client from '../api/client';
 import type { Expense } from '../types';
-import { MagnifyingGlass, Funnel, Trash, CurrencyInr } from '@phosphor-icons/react';
+import { MagnifyingGlass, Trash, CurrencyInr } from '@phosphor-icons/react';
 
 const AllExpenses: React.FC = () => {
-  const { month, year } = useDate();
+  // const { month, year } = useDate();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
