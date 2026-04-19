@@ -9,6 +9,7 @@ import AddExpense from './pages/AddExpense';
 import AllExpenses from './pages/Expenses';
 import Categories from './pages/Categories';
 import BudgetSettings from './pages/BudgetSettings';
+import VaultManager from './pages/VaultManager';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -45,6 +46,11 @@ function App() {
         <Route path="/budget" element={
           <ProtectedRoute>
             <Layout><BudgetSettings /></Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/vault" element={
+          <ProtectedRoute>
+            <Layout><VaultManager /></Layout>
           </ProtectedRoute>
         } />
       </Routes>

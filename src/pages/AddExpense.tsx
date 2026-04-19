@@ -140,6 +140,7 @@ const AddExpense: React.FC = () => {
             />
           </div>
 
+
           {/* Category Dropdown */}
           <div className="sm:col-span-2 space-y-2 relative">
             <label className="text-[11px] font-medium text-muted uppercase tracking-wider">Category *</label>

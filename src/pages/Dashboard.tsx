@@ -12,18 +12,21 @@ const Dashboard: React.FC = () => {
   const { month, year } = useDate();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [budget, setBudget] = useState<Budget | null>(null);
+  const [vaultBalance, setVaultBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [expResp, budResp] = await Promise.all([
+        const [expResp, budResp, vaultResp] = await Promise.all([
           client.get(`/api/expenses?month=${month}&year=${year}`),
-          client.get(`/api/budget?month=${month}&year=${year}`)
+          client.get(`/api/budget?month=${month}&year=${year}`),
+          client.get('/api/vault/balance')
         ]);
         setExpenses(expResp.data);
         setBudget(budResp.data);
+        setVaultBalance(vaultResp.data.balance || 0);
       } catch (err) {
         console.error('Error fetching dashboard data', err);
       } finally {
@@ -76,7 +79,25 @@ const Dashboard: React.FC = () => {
       </header>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="glass-card p-6 relative overflow-hidden group border-[#c07af0]/20">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <p className="text-[11px] font-medium text-muted uppercase tracking-wider mb-1 text-[#c07af0]">Savings Vault</p>
+              <div className="flex items-center gap-1.5 text-4xl font-serif text-[#c07af0]">
+                <CurrencyInr weight="duotone" size={32} />
+                {fmt(vaultBalance)}
+              </div>
+            </div>
+            <div className="p-2 bg-[#c07af0]/10 text-[#c07af0] rounded-lg group-hover:scale-110 transition-transform">
+              <Target size={24} weight="duotone" />
+            </div>
+          </div>
+          <div className="h-1 bg-dim rounded-full mt-4 overflow-hidden">
+            <div className="h-full bg-[#c07af0] w-full opacity-50" />
+          </div>
+        </div>
+
         <div className="glass-card p-6 relative overflow-hidden group">
           <div className="flex justify-between items-start mb-4">
             <div>

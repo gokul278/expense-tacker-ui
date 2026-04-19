@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDate } from '../context/DateContext';
-import { SquaresFour, Receipt, PlusCircle, ChartPie, Gear, SignOut, CaretLeft, List, CalendarBlank, X, CurrencyInr, CaretDown } from '@phosphor-icons/react';
+import { SquaresFour, Receipt, PlusCircle, ChartPie, Gear, SignOut, CaretLeft, List, CalendarBlank, X, CurrencyInr, CaretDown, Target } from '@phosphor-icons/react';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { logout } = useAuth();
@@ -17,6 +17,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const navItems = [
     { name: 'Dashboard', path: '/', icon: SquaresFour },
+    { name: 'Savings Vault', path: '/vault', icon: Target },
     { name: 'Expenses', path: '/expenses', icon: Receipt },
     { name: 'Add Expense', path: '/add', icon: PlusCircle },
     { name: 'Categories', path: '/categories', icon: ChartPie },
@@ -49,7 +50,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {/* Sidebar */}
       <aside className={`
         fixed inset-y-0 left-0 z-40 w-64 bg-surface border-r border-white/5 p-6 flex flex-col gap-8
-        transition-transform duration-300 md:relative md:translate-x-0 md:h-full
+        transition-transform duration-300 md:relative md:translate-x-0 md:h-full overflow-y-auto custom-scrollbar
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex items-center gap-3 text-[#f0f0ee] font-serif tracking-tight text-3xl mb-4 px-2">

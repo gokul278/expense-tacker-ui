@@ -1,20 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import client from '../api/client';
+import { useDate } from '../context/DateContext';
 import type { Expense } from '../types';
-import { MagnifyingGlass, Trash, CurrencyInr } from '@phosphor-icons/react';
+import { MagnifyingGlass, Trash, CurrencyInr, Note, X } from '@phosphor-icons/react';
 
 const AllExpenses: React.FC = () => {
-  // const { month, year } = useDate();
+  const { month, year } = useDate();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCat, setFilterCat] = useState('');
   const [filterTag, setFilterTag] = useState('');
+  const [selectedNote, setSelectedNote] = useState<{name: string, content: string} | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = async (m: string, y: number) => {
     setLoading(true);
     try {
-      const resp = await client.get('/api/expenses');
+      const resp = await client.get('/api/expenses', {
+        params: { month: m, year: y }
+      });
       setExpenses(resp.data);
     } catch (err) {
       console.error('Error fetching expenses', err);
@@ -24,8 +28,8 @@ const AllExpenses: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(month, year);
+  }, [month, year]);
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this expense?')) return;
@@ -94,10 +98,10 @@ const AllExpenses: React.FC = () => {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
+        {/* Table Container */}
+        <div className="overflow-x-auto max-h-[calc(100vh-320px)] overflow-y-auto custom-scrollbar relative border border-white/5 rounded-2xl">
+          <table className="w-full text-left border-collapse">
+            <thead className="sticky top-0 z-20 bg-surface2/95 backdrop-blur-md shadow-sm">
               <tr className="text-[10px] uppercase tracking-widest text-muted border-b border-white/5">
                 <th className="px-4 py-4 font-medium">Date</th>
                 <th className="px-4 py-4 font-medium">Name</th>
@@ -145,9 +149,19 @@ const AllExpenses: React.FC = () => {
                     <span className="text-[11px] text-muted">{e.mode || '—'}</span>
                   </td>
                   <td className="px-4 py-4">
-                    <p className="text-[11px] text-muted truncate max-w-[150px]" title={e.notes}>
-                      {e.notes || '—'}
-                    </p>
+                    {e.notes ? (
+                      <button 
+                        onClick={() => setSelectedNote({ name: e.name, content: e.notes })}
+                        className="flex items-center gap-2 group/note"
+                      >
+                        <p className="text-[11px] text-muted truncate max-w-[120px] group-hover/note:text-accent transition-colors">
+                          {e.notes}
+                        </p>
+                        <Note size={14} weight="duotone" className="text-dim group-hover/note:text-accent transition-colors shrink-0" />
+                      </button>
+                    ) : (
+                      <span className="text-[11px] text-dim">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-4 text-right">
                     <div className="inline-flex items-center gap-1 text-base font-serif text-[#f0f0ee]">
@@ -169,6 +183,46 @@ const AllExpenses: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Full Note Modal */}
+      {selectedNote && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-bg/80 backdrop-blur-md animate-in fade-in duration-300"
+            onClick={() => setSelectedNote(null)}
+          />
+          <div className="relative w-full max-w-lg glass-card p-8 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 shadow-2xl">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h3 className="text-sm text-muted font-medium uppercase tracking-wider mb-2">Transaction Note</h3>
+                <h2 className="text-xl font-serif text-[#f0f0ee]">{selectedNote.name}</h2>
+              </div>
+              <button 
+                onClick={() => setSelectedNote(null)}
+                className="p-2 bg-surface2 border border-white/5 rounded-xl text-muted hover:text-[#f0f0ee] transition-all"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="bg-surface2/50 border border-white/5 rounded-2xl p-6 relative group overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <Note size={80} weight="duotone" />
+              </div>
+              <p className="text-[#f0f0ee]/90 text-[15px] leading-relaxed relative z-10 whitespace-pre-wrap">
+                {selectedNote.content}
+              </p>
+            </div>
+
+            <button 
+              onClick={() => setSelectedNote(null)}
+              className="w-full mt-8 bg-surface2 border border-white/10 rounded-xl py-3 text-sm font-medium text-[#f0f0ee] hover:bg-white/5 transition-all"
+            >
+              Close Note
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
