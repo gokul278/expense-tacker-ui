@@ -115,7 +115,7 @@ const AddExpense: React.FC = () => {
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="sm:col-span-2 space-y-2">
             <label className="text-[11px] font-medium text-muted uppercase tracking-wider flex items-center gap-1">
               Amount <CurrencyInr size={12} weight="bold" /> *
             </label>
@@ -129,7 +129,7 @@ const AddExpense: React.FC = () => {
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="sm:col-span-2 space-y-2">
             <label className="text-[11px] font-medium text-muted uppercase tracking-wider">Date *</label>
             <input
               required
@@ -141,7 +141,7 @@ const AddExpense: React.FC = () => {
           </div>
 
           {/* Category Dropdown */}
-          <div className="space-y-2 relative">
+          <div className="sm:col-span-2 space-y-2 relative">
             <label className="text-[11px] font-medium text-muted uppercase tracking-wider">Category *</label>
             <button
               type="button"
@@ -181,7 +181,7 @@ const AddExpense: React.FC = () => {
           </div>
 
           {/* Mode Dropdown */}
-          <div className="space-y-2 relative">
+          <div className="sm:col-span-2 space-y-2 relative">
             <label className="text-[11px] font-medium text-muted uppercase tracking-wider">Payment Mode</label>
             <button
               type="button"
