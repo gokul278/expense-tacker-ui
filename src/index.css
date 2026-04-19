@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+    @apply font-sans;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif tracking-tight text-[#f0f0ee];
+  }
+
+  h1 { @apply text-4xl lg:text-5xl; }
+  h2 { @apply text-2xl lg:text-3xl; }
+  h3 { @apply text-xl; }
+
+  /* Noise grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    @apply pointer-events-none z-0;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-surface border border-white/5 rounded-[20px] transition-all duration-200 hover:border-white/10;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { @apply bg-dim rounded-[2px]; }
