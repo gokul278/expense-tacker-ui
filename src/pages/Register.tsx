@@ -55,7 +55,7 @@ const Register: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-surface2 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-accent outline-none transition-all placeholder:text-dim"
+                className="w-full bg-surface2 border border-white/10 rounded-xl px-4 py-3 text-sm text-[#f0f0ee] focus:border-accent outline-none transition-all placeholder:text-dim"
                 placeholder="you@example.com"
               />
             </div>
@@ -66,7 +66,7 @@ const Register: React.FC = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-surface2 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-accent outline-none transition-all placeholder:text-dim"
+                className="w-full bg-surface2 border border-white/10 rounded-xl px-4 py-3 text-sm text-[#f0f0ee] focus:border-accent outline-none transition-all placeholder:text-dim"
                 placeholder="••••••••"
               />
             </div>
@@ -77,7 +77,7 @@ const Register: React.FC = () => {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full bg-surface2 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-accent outline-none transition-all placeholder:text-dim"
+                className="w-full bg-surface2 border border-white/10 rounded-xl px-4 py-3 text-sm text-[#f0f0ee] focus:border-accent outline-none transition-all placeholder:text-dim"
                 placeholder="••••••••"
               />
             </div>
