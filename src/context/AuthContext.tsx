@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { User } from '../types';
+import client from '../api/client';
 
 interface AuthContextType {
   user: User | null;
@@ -31,12 +32,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser({ id: userId, email: '' });
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     setToken(null);
     setUser(null);
-  };
+  }, []);
+
+  useEffect(() => {
+    const interceptor = client.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      client.interceptors.response.eject(interceptor);
+    };
+  }, [logout]);
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token }}>

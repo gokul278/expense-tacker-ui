@@ -3,7 +3,7 @@ import client from '../api/client';
 import { 
   Target, CurrencyInr, Plus, Minus, ArrowDown, Trash,
   Receipt, DotsThreeCircle, CaretDown, QrCode, Money, 
-  CreditCard, Globe, Note, X
+  CreditCard, Globe, Note, X, PencilSimple
 } from '@phosphor-icons/react';
 
 const VaultManager: React.FC = () => {
@@ -13,6 +13,19 @@ const VaultManager: React.FC = () => {
   const [updating, setUpdating] = useState(false);
   const [status, setStatus] = useState<{msg: string, type: 'success' | 'error'} | null>(null);
   const [selectedNote, setSelectedNote] = useState<{ name: string; content: string } | null>(null);
+
+  const [editingTx, setEditingTx] = useState<any | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    amount: '',
+    type: 'deposit',
+    category: '',
+    mode: '',
+    notes: '',
+    date: ''
+  });
+  const [editCategoryDropdownOpen, setEditCategoryDropdownOpen] = useState(false);
+  const [editModeDropdownOpen, setEditModeDropdownOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -111,6 +124,49 @@ const VaultManager: React.FC = () => {
       await fetchBalance();
     } catch (err) {
       console.error('Error deleting history', err);
+    }
+  };
+
+  const handleEditClick = (tx: any) => {
+    setEditFormData({
+      name: tx.name,
+      amount: tx.amount.toString(),
+      type: tx.type,
+      category: tx.category,
+      mode: tx.mode || '',
+      notes: tx.notes || '',
+      date: new Date(tx.date).toISOString().split('T')[0]
+    });
+    setEditingTx(tx);
+    setEditCategoryDropdownOpen(false);
+    setEditModeDropdownOpen(false);
+  };
+
+  const handleUpdateEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTx) return;
+    if (!editFormData.amount || isNaN(parseFloat(editFormData.amount))) return;
+    if (!editFormData.name || !editFormData.category) {
+      alert('Please fill out all required fields (*)');
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      const d = new Date(editFormData.date);
+      await client.put(`/api/vault/history/${editingTx.id}`, {
+        ...editFormData,
+        amount: parseFloat(editFormData.amount),
+        date: d.toISOString()
+      });
+      await Promise.all([fetchBalance(), fetchHistory()]);
+      setEditingTx(null);
+      setStatus({ msg: 'Vault transaction successfully updated.', type: 'success' });
+    } catch (err) {
+      console.error('Error updating vault transaction', err);
+      alert('Failed to update transaction. Please try again.');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -353,14 +409,20 @@ const VaultManager: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-8">
-                      <div className="text-right">
+                    <div className="flex items-center gap-3">
+                      <div className="text-right mr-2">
                         <p className={`text-lg font-bold font-serif ${
                           tx.type === 'deposit' ? 'text-[#1d9e75]' : 'text-danger'
                         }`}>
                           {tx.type === 'deposit' ? '+' : '-'} {fmt(tx.amount)}
                         </p>
                       </div>
+
+                      <button onClick={() => handleEditClick(tx)}
+                        className="p-2 text-muted hover:text-[#c07af0] hover:bg-[#c07af0]/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <PencilSimple size={18} />
+                      </button>
 
                       <button onClick={() => handleDeleteHistory(tx.id)}
                         className="p-2 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
@@ -412,6 +474,174 @@ const VaultManager: React.FC = () => {
             >
               Close Note
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingTx && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div 
+            className="absolute inset-0 bg-bg/80 backdrop-blur-md animate-in fade-in duration-300"
+            onClick={() => setEditingTx(null)}
+          />
+          <div className="relative w-full max-w-lg glass-card p-8 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h3 className="text-sm text-[#c07af0] font-medium uppercase tracking-wider mb-2">Edit Vault Transaction</h3>
+                <h2 className="text-xl font-serif text-[#f0f0ee]">Update transaction details</h2>
+              </div>
+              <button 
+                onClick={() => setEditingTx(null)}
+                className="p-2 bg-surface2 border border-white/5 rounded-xl text-muted hover:text-[#f0f0ee] transition-all"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleUpdateEdit} className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-[11px] font-medium text-muted uppercase tracking-wider">Transaction Name *</label>
+                <input
+                  required
+                  type="text"
+                  value={editFormData.name}
+                  onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                  className="w-full bg-surface2 border border-white/10 rounded-xl px-4 py-3 text-sm text-[#f0f0ee] focus:border-[#c07af0] outline-none transition-all"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-medium text-muted uppercase tracking-wider flex items-center gap-1">
+                    Amount <CurrencyInr size={12} weight="bold" /> *
+                  </label>
+                  <input
+                    required
+                    type="number"
+                    value={editFormData.amount}
+                    onChange={(e) => setEditFormData({...editFormData, amount: e.target.value})}
+                    className="w-full bg-surface2 border border-white/10 rounded-xl px-4 py-3 text-sm text-[#f0f0ee] focus:border-[#c07af0] outline-none transition-all font-serif font-bold"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[11px] font-medium text-muted uppercase tracking-wider">Date *</label>
+                  <input
+                    required
+                    type="date"
+                    value={editFormData.date}
+                    onChange={(e) => setEditFormData({...editFormData, date: e.target.value})}
+                    className="w-full bg-surface2 border border-white/10 rounded-xl px-4 py-3 text-sm text-[#f0f0ee] focus:border-[#c07af0] outline-none transition-all color-scheme-dark"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 relative">
+                  <label className="text-[11px] font-medium text-muted uppercase tracking-wider">Category *</label>
+                  <button
+                    type="button"
+                    onClick={() => { setEditCategoryDropdownOpen(!editCategoryDropdownOpen); setEditModeDropdownOpen(false); }}
+                    className="w-full bg-surface2 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-[#c07af0] outline-none transition-all flex items-center justify-between"
+                  >
+                    <span className="text-[#f0f0ee]">{editFormData.category || 'Select'}</span>
+                    <CaretDown size={14} className={`transition-transform duration-300 ${editCategoryDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {editCategoryDropdownOpen && (
+                    <div className="absolute z-[110] top-full left-0 right-0 mt-2 bg-surface2 border border-white/10 rounded-2xl shadow-2xl overflow-hidden py-2 max-h-48 overflow-y-auto custom-scrollbar">
+                      {categories.map((cat) => (
+                        <button key={cat.name} type="button" onClick={() => { setEditFormData({...editFormData, category: cat.name}); setEditCategoryDropdownOpen(false); }}
+                          className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${editFormData.category === cat.name ? 'bg-[#c07af0]/10 text-[#c07af0]' : 'text-muted hover:bg-white/5 hover:text-[#f0f0ee]'}`}
+                        >
+                          <cat.icon size={18} weight={editFormData.category === cat.name ? "fill" : "duotone"} />
+                          {cat.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2 relative">
+                  <label className="text-[11px] font-medium text-muted uppercase tracking-wider">Payment Mode</label>
+                  <button
+                    type="button"
+                    onClick={() => { setEditModeDropdownOpen(!editModeDropdownOpen); setEditCategoryDropdownOpen(false); }}
+                    className="w-full bg-surface2 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-[#c07af0] outline-none transition-all flex items-center justify-between"
+                  >
+                    <span className="text-[#f0f0ee]">{editFormData.mode || 'Direct'}</span>
+                    <CaretDown size={14} className={`transition-transform duration-300 ${editModeDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {editModeDropdownOpen && (
+                    <div className="absolute z-[110] top-full left-0 right-0 mt-2 bg-surface2 border border-white/10 rounded-2xl shadow-2xl overflow-hidden py-2">
+                      {modes.map((m) => (
+                        <button key={m.name} type="button" onClick={() => { setEditFormData({...editFormData, mode: m.name}); setEditModeDropdownOpen(false); }}
+                          className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${editFormData.mode === m.name ? 'bg-[#c07af0]/10 text-[#c07af0]' : 'text-muted hover:bg-white/5 hover:text-[#f0f0ee]'}`}
+                        >
+                          <m.icon size={18} weight="duotone" />
+                          {m.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[11px] font-medium text-muted uppercase tracking-wider">Transaction Type *</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setEditFormData({...editFormData, type: 'deposit'})}
+                    className={`py-3 rounded-xl border text-sm font-medium transition-all ${
+                      editFormData.type === 'deposit' 
+                        ? 'bg-[#1d9e75]/10 border-[#1d9e75] text-[#1d9e75]' 
+                        : 'border-white/10 text-muted hover:bg-white/5'
+                    }`}
+                  >
+                    Deposit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditFormData({...editFormData, type: 'expense'})}
+                    className={`py-3 rounded-xl border text-sm font-medium transition-all ${
+                      editFormData.type === 'expense' 
+                        ? 'bg-danger/10 border-danger text-danger' 
+                        : 'border-white/10 text-muted hover:bg-white/5'
+                    }`}
+                  >
+                    Expense
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[11px] font-medium text-muted uppercase tracking-wider font-semibold">Additional Notes</label>
+                <textarea
+                  value={editFormData.notes}
+                  onChange={(e) => setEditFormData({...editFormData, notes: e.target.value})}
+                  className="w-full bg-surface2 border border-white/10 rounded-xl px-4 py-3 text-sm text-[#f0f0ee] focus:border-[#c07af0] outline-none transition-all h-20 resize-none placeholder:text-dim"
+                  placeholder="Optional details..."
+                />
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setEditingTx(null)}
+                  className="flex-1 bg-surface2 border border-white/10 rounded-xl py-3 text-sm font-medium text-[#f0f0ee] hover:bg-white/5 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updating}
+                  className="flex-1 bg-[#c07af0] text-bg rounded-xl py-3 text-sm font-semibold hover:bg-[#b06ae0] transition-all disabled:opacity-50"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
