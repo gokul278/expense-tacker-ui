@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import client from '../api/client';
 import { 
   Target, CurrencyInr, Plus, Minus, ArrowDown, Trash,
@@ -368,9 +369,9 @@ const VaultManager: React.FC = () => {
             ) : (
               <div className="divide-y divide-white/5">
                 {history.map((tx) => (
-                  <div key={tx.id} className="p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors group">
-                    <div className="flex items-center gap-5">
-                      <div className={`p-3 rounded-2xl ${
+                  <div key={tx.id} className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 hover:bg-white/[0.02] transition-colors group">
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-5 min-w-0">
+                      <div className={`p-3 rounded-2xl shrink-0 ${
                         tx.type === 'deposit' ? 'bg-[#1d9e75]/10 text-[#1d9e75]' : 'bg-danger/10 text-danger'
                       }`}>
                         {(() => {
@@ -378,28 +379,26 @@ const VaultManager: React.FC = () => {
                           return cat ? <cat.icon size={24} weight="duotone" /> : <ArrowDown size={24} weight="duotone" />;
                         })()}
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="text-base font-medium text-[#f0f0ee]">{tx.name}</p>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-muted border border-white/10 uppercase tracking-tighter">
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
+                          <p className="text-sm sm:text-base font-medium text-[#f0f0ee] break-words">{tx.name}</p>
+                          <span className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-muted border border-white/10 uppercase tracking-tighter w-fit shrink-0">
                             {tx.category}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <p className="text-[11px] text-muted flex items-center gap-3">
-                            <span>{new Date(tx.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                            <span className="w-1 h-1 rounded-full bg-white/10" />
-                            <span>{tx.mode || 'Direct'}</span>
-                          </p>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] text-muted">
+                          <span>{new Date(tx.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                          <span className="w-1 h-1 rounded-full bg-white/10" />
+                          <span>{tx.mode || 'Direct'}</span>
                           {tx.notes && (
                             <>
                               <span className="w-1 h-1 rounded-full bg-white/10" />
                               <button 
                                 onClick={() => setSelectedNote({ name: tx.name, content: tx.notes })}
-                                className="flex items-center gap-1.5 group/note"
+                                className="flex items-center gap-1.5 group/note text-left"
                               >
-                                <Note size={14} weight="duotone" className="text-dim group-hover/note:text-[#c07af0] transition-colors" />
-                                <span className="text-[11px] text-dim group-hover/note:text-[#c07af0] transition-colors max-w-[80px] truncate">
+                                <Note size={14} weight="duotone" className="text-dim group-hover/note:text-[#c07af0] transition-colors shrink-0" />
+                                <span className="text-dim group-hover/note:text-[#c07af0] transition-colors max-w-[120px] sm:max-w-[150px] truncate">
                                   {tx.notes}
                                 </span>
                               </button>
@@ -409,26 +408,28 @@ const VaultManager: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="text-right mr-2">
-                        <p className={`text-lg font-bold font-serif ${
+                    <div className="flex items-center justify-between sm:justify-end gap-3 sm:pl-0 pl-14">
+                      <div className="text-right sm:mr-2">
+                        <p className={`text-base sm:text-lg font-bold font-serif ${
                           tx.type === 'deposit' ? 'text-[#1d9e75]' : 'text-danger'
                         }`}>
                           {tx.type === 'deposit' ? '+' : '-'} {fmt(tx.amount)}
                         </p>
                       </div>
 
-                      <button onClick={() => handleEditClick(tx)}
-                        className="p-2 text-muted hover:text-[#c07af0] hover:bg-[#c07af0]/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                      >
-                        <PencilSimple size={18} />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => handleEditClick(tx)}
+                          className="p-2 text-muted hover:text-[#c07af0] hover:bg-[#c07af0]/10 rounded-lg transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                        >
+                          <PencilSimple size={18} />
+                        </button>
 
-                      <button onClick={() => handleDeleteHistory(tx.id)}
-                        className="p-2 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                      >
-                        <Trash size={18} />
-                      </button>
+                        <button onClick={() => handleDeleteHistory(tx.id)}
+                          className="p-2 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                        >
+                          <Trash size={18} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -439,7 +440,7 @@ const VaultManager: React.FC = () => {
       </div>
 
       {/* Modern Note Overlay */}
-      {selectedNote && (
+      {selectedNote && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div 
             className="absolute inset-0 bg-bg/80 backdrop-blur-md animate-in fade-in duration-300"
@@ -475,17 +476,18 @@ const VaultManager: React.FC = () => {
               Close Note
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Edit Modal */}
-      {editingTx && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+      {editingTx && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           <div 
             className="absolute inset-0 bg-bg/80 backdrop-blur-md animate-in fade-in duration-300"
             onClick={() => setEditingTx(null)}
           />
-          <div className="relative w-full max-w-lg glass-card p-8 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar">
+          <div className="relative w-full max-w-lg glass-card p-5 sm:p-8 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar">
             <div className="flex justify-between items-start mb-6">
               <div>
                 <h3 className="text-sm text-[#c07af0] font-medium uppercase tracking-wider mb-2">Edit Vault Transaction</h3>
@@ -511,7 +513,7 @@ const VaultManager: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[11px] font-medium text-muted uppercase tracking-wider flex items-center gap-1">
                     Amount <CurrencyInr size={12} weight="bold" /> *
@@ -537,7 +539,7 @@ const VaultManager: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2 relative">
                   <label className="text-[11px] font-medium text-muted uppercase tracking-wider">Category *</label>
                   <button
@@ -625,25 +627,26 @@ const VaultManager: React.FC = () => {
                 />
               </div>
 
-              <div className="flex gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                 <button
                   type="button"
                   onClick={() => setEditingTx(null)}
-                  className="flex-1 bg-surface2 border border-white/10 rounded-xl py-3 text-sm font-medium text-[#f0f0ee] hover:bg-white/5 transition-all"
+                  className="w-full sm:flex-1 bg-surface2 border border-white/10 rounded-xl py-3 text-sm font-medium text-[#f0f0ee] hover:bg-white/5 transition-all order-2 sm:order-1"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updating}
-                  className="flex-1 bg-[#c07af0] text-bg rounded-xl py-3 text-sm font-semibold hover:bg-[#b06ae0] transition-all disabled:opacity-50"
+                  className="w-full sm:flex-1 bg-[#c07af0] text-bg rounded-xl py-3 text-sm font-semibold hover:bg-[#b06ae0] transition-all disabled:opacity-50 order-1 sm:order-2"
                 >
                   Save Changes
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

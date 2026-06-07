@@ -169,7 +169,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 h-full p-6 pt-24 md:p-10 md:pt-10 overflow-y-auto z-10 scroll-smooth">
+      <main className="flex-1 h-full p-6 pt-24 md:p-10 md:pt-10 overflow-y-auto scroll-smooth">
         {children}
       </main>
     </div>

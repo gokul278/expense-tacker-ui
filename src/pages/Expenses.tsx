@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import client from '../api/client';
 import { useDate } from '../context/DateContext';
 import type { Expense } from '../types';
@@ -103,16 +104,10 @@ const AllExpenses: React.FC = () => {
     setUpdating(true);
     try {
       const d = new Date(editFormData.date);
-      const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-      const updatedMonth = mNames[d.getMonth()];
-      const updatedYear = d.getFullYear();
-
       await client.put(`/api/expenses/${editingExpense.id}`, {
         ...editFormData,
         amount: parseFloat(editFormData.amount),
-        date: d.toISOString(),
-        month: updatedMonth,
-        year: updatedYear
+        date: d.toISOString()
       });
       await fetchData(month, year);
       setEditingExpense(null);
@@ -290,7 +285,7 @@ const AllExpenses: React.FC = () => {
       </div>
 
       {/* Full Note Modal */}
-      {selectedNote && (
+      {selectedNote && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div 
             className="absolute inset-0 bg-bg/80 backdrop-blur-md animate-in fade-in duration-300"
@@ -326,17 +321,18 @@ const AllExpenses: React.FC = () => {
               Close Note
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Edit Modal */}
-      {editingExpense && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+      {editingExpense && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           <div 
             className="absolute inset-0 bg-bg/80 backdrop-blur-md animate-in fade-in duration-300"
             onClick={() => setEditingExpense(null)}
           />
-          <div className="relative w-full max-w-lg glass-card p-8 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar">
+          <div className="relative w-full max-w-lg glass-card p-5 sm:p-8 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar">
             <div className="flex justify-between items-start mb-6">
               <div>
                 <h3 className="text-sm text-accent font-medium uppercase tracking-wider mb-2">Edit Expense</h3>
@@ -362,7 +358,7 @@ const AllExpenses: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[11px] font-medium text-muted uppercase tracking-wider flex items-center gap-1">
                     Amount <CurrencyInr size={12} weight="bold" /> *
@@ -388,7 +384,7 @@ const AllExpenses: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2 relative">
                   <label className="text-[11px] font-medium text-muted uppercase tracking-wider">Category *</label>
                   <button
@@ -436,7 +432,7 @@ const AllExpenses: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2 relative">
                   <label className="text-[11px] font-medium text-muted uppercase tracking-wider">Tag</label>
                   <button
@@ -492,25 +488,26 @@ const AllExpenses: React.FC = () => {
                 />
               </div>
 
-              <div className="flex gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                 <button
                   type="button"
                   onClick={() => setEditingExpense(null)}
-                  className="flex-1 bg-surface2 border border-white/10 rounded-xl py-3 text-sm font-medium text-[#f0f0ee] hover:bg-white/5 transition-all"
+                  className="w-full sm:flex-1 bg-surface2 border border-white/10 rounded-xl py-3 text-sm font-medium text-[#f0f0ee] hover:bg-white/5 transition-all order-2 sm:order-1"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updating}
-                  className="flex-1 bg-accent text-bg rounded-xl py-3 text-sm font-semibold hover:bg-[#d4f57a] transition-all disabled:opacity-50"
+                  className="w-full sm:flex-1 bg-accent text-bg rounded-xl py-3 text-sm font-semibold hover:bg-[#d4f57a] transition-all disabled:opacity-50 order-1 sm:order-2"
                 >
                   Save Changes
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
